@@ -12,9 +12,12 @@ struct __FILE
 FILE __stdout; // Use with printf
 FILE __stdin;  // use with fget/sscanf, or scanf
 
-volatile char commandBuf[BUFFER_SIZE];
-volatile char bufWriteIndex = 0;
-volatile char needsProcessing = 0;
+volatile char ringBuf[RING_SIZE];
+volatile uint8_t ringHead = 0; // write to the head (owned by ISR)
+volatile uint8_t ringTail = 0;	// read from the tail (owned by main loop)
+
+char commandBuf[COMMAND_SIZE];
+uint8_t commandIndex = 0;
 
 // Retarget the fputc method to use the UART2
 int fputc(int ch, FILE *f)
@@ -95,16 +98,19 @@ void Init_UART2(uint32_t baud_rate)
 
 void UART2_IRQHandler(void)
 {
-	if (UART2->S1 & UART_S1_RDRF_MASK)
-		commandBuf[bufWriteIndex] = UART2->D; // Reads the receieved character into commandBuf and clears the receive flag
+	if (UART2->S1 & UART_S1_RDRF_MASK) {	// Received Char Interrupt
+		char cin = UART2->D; // reading this clears the interrupt flag
 
-	if (commandBuf[bufWriteIndex++] == '\n')
-	{
-		needsProcessing++;
+		uint8_t nextHead = nextIndex(ringHead);
+		if (nextHead == ringTail) {
+			// Ring Full! Do not proceed to write the next character
+			// TODO: Turn on RED Led
+			return;
+		}
+
+		ringBuf[ringHead] = cin; // Reads the receieved character into ringBuf
+		ringHead = nextIndex(ringHead);
 	}
-
-	if (bufWriteIndex >= BUFFER_SIZE)
-		bufWriteIndex = 0;
 }
 
 // // Sends every character in the buffer starting with the address bufStart up to and including the location of the specified terminalChar character

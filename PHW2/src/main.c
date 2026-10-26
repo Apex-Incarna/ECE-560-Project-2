@@ -18,8 +18,6 @@ float P3V3_voltage = 0.0;
 volatile int do_convert = 0, do_print = 0, do_calculate = 0;
 volatile uint32_t ADC_temp = 0;
 
-char bufReadIndex = 0;
-
 void Misc(void)
 {
 	SIM->SCGC5 |= SIM_SCGC5_PORTA_MASK;
@@ -148,101 +146,6 @@ void Print(float voltage)
 	Control_RGB_LEDs(0, 2, 2);
 }
 
-char preIncWrap(char *i)
-{
-	if (++(*i) >= BUFFER_SIZE)
-		*i = 0;
-	return *i;
-}
-
-char postIncWrap(char *i)
-{
-	char old = *i;
-	if (++(*i) >= BUFFER_SIZE)
-		*i = 0;
-	return old;
-}
-
-// Parses the integer starting at commandBuf[bufReadIndex] up to the newline character;
-// Returns -1 if no integer is specified; otherwise returns the integer
-// Always sets bufReadIndex to be the character after the newline, minding the circular buffer
-int parseInt(void)
-{
-	int ret = 0;
-	if (commandBuf[postIncWrap(bufReadIndex)] == '\n')
-	{
-		return -1;
-	}
-
-	char c;
-	while (c = commandBuf[postIncWrap(bufReadIndex)] != '/n')
-	{
-		ret *= 10;
-		ret += (c - '0');
-	}
-
-	return ret;
-}
-
-void ProcessCommand(char)
-{
-	// Switch on the current character and then increment the read index to be looking at either the newline character or the first character in the integer argument
-	switch (commandBuf[postIncWrap(bufReadIndex)])
-	{
-	case 'C':
-		int channelNum = parseInt();
-		if (channelNum == -1)
-			channelNum = 12;
-
-		if (channelNum == 12 || channelNum == 26 || channelNum = 27)
-		{
-			ADC0->SC1[0] = ADC_SC1_ADCH(channelNum);
-
-			printf("Channel %d selected.", channelNum);
-		}
-		// else: Invalid channel, Ignore command
-		break;
-	case 'P':
-		int samplePeriod = parseInt();
-		if (samplePeriod == -1)
-			samplePeriod = 100;
-		else if (samplePeriod >= 5 && samplePeriod <= 1000)
-		{
-			// Do the Math: set timer reload register based on this number of microseconds
-
-			printf("Sampling period = %d us.", samplePeriod);
-		}
-		// invalid parameter, ignore command
-		break;
-	case 'N':
-		int numSamples = parseInt();
-		if (numSamples == -1)
-			numSamples = 20;
-		else if (numSamples >= 1 && numSamples <= 2000)
-		{
-			// set global variable that determines number of samples?
-		}
-		// else: invalid param, ignore command
-		break;
-	case 'A':
-		/* code */
-		break;
-	case 'F':
-		/* code */
-		break;
-	case 'S':
-		/* code */
-		break;
-	default:
-		break;
-	}
-
-	// If A received, await trigger
-	// If trigger met, start conversion
-
-	// If S receieved, send data
-}
-
 /*----------------------------------------------------------------------------
   MAIN function
  *----------------------------------------------------------------------------*/
@@ -267,12 +170,7 @@ int main(void)
 
 	while (1)
 	{
-		// Run CLI
-		if (needsProcessing > 0)
-		{
-			needsProcessing--;
-			ProcessCommand();
-		}
+		ProcessRingBuf();
 
 		if (do_convert > 0)
 		{

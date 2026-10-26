@@ -8,18 +8,16 @@
 #define SYS_CLOCK (48e6)
 #define BUS_CLOCK (24e6)
 
-// Our defines
-#define BUFFER_SIZE 16
-#define PROC_SIZE 16
+// Defines //
+#define RING_SIZE 16    // true size is 15; one space is reserved for checking full vs empty
+#define COMMAND_SIZE 16 // more than needed but that's okay
 
+// Functions //
 void Init_UART2(uint32_t baud_rate);
-void UART2_Transmit_Poll(uint8_t data);
-uint8_t UART2_Receive_Poll(void);
-
-void Send_String_Poll(uint8_t *str);
-
-// Our functions //
-
+uint8_t nextIndex(uint8_t index);
 void Transmit(char *bufStart, char terminalChar);
+void ProcessRingBuf(void);
+void ProcessCommand(void);
+
 #endif
 // *******************************ARM University Program Copyright � ARM Ltd 2013*************************************

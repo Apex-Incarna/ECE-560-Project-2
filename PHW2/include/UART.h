@@ -4,15 +4,22 @@
 #include <stdint.h>
 #include <MKL25Z4.H>
 
+#define UART_OVERSAMPLE_RATE (16)
+#define SYS_CLOCK (48e6)
+#define BUS_CLOCK (24e6)
 
-#define UART_OVERSAMPLE_RATE 	(16)
-#define SYS_CLOCK							(48e6)
-#define BUS_CLOCK							(24e6)
+// Our defines
+#define BUFFER_SIZE 16
+#define PROC_SIZE 16
 
 void Init_UART2(uint32_t baud_rate);
 void UART2_Transmit_Poll(uint8_t data);
 uint8_t UART2_Receive_Poll(void);
 
-void Send_String_Poll(uint8_t * str);
+void Send_String_Poll(uint8_t *str);
+
+// Our functions //
+
+void Transmit(char *bufStart, char terminalChar);
 #endif
-// *******************************ARM University Program Copyright © ARM Ltd 2013*************************************   
+// *******************************ARM University Program Copyright ï¿½ ARM Ltd 2013*************************************

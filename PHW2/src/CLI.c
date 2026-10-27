@@ -3,6 +3,9 @@
 #include "ourGlobals.h"
 #include "timers.h"
 
+char commandBuf[COMMAND_SIZE];
+uint8_t commandIndex = 0;
+
 // Parses the integer starting at commandBug[startIndex] up to the newline character;
 // Returns -1 if invalid; otherwise returns the integer
 int parseIntToNewline(uint8_t startIndex)

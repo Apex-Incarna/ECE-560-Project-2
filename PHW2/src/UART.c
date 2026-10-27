@@ -16,9 +16,6 @@ volatile char ringBuf[RING_SIZE];
 volatile uint8_t ringHead = 0; // write to the head (owned by ISR)
 volatile uint8_t ringTail = 0;	// read from the tail (owned by main loop)
 
-char commandBuf[COMMAND_SIZE];
-uint8_t commandIndex = 0;
-
 // Retarget the fputc method to use the UART2
 int fputc(int ch, FILE *f)
 {

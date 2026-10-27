@@ -15,6 +15,9 @@ volatile uint16_t numSamples = 1;
 
 void Init_ADC(void)
 {
+	// TODO: Edit initial hardware trigger to the CMP module,
+	// In first interrupt change trigger to PIT 
+
 	SIM->SCGC6 |= SIM_SCGC6_ADC0(1); // Activates the clock for the ADC
 
 

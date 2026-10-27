@@ -8,7 +8,8 @@
 int parseIntToNewline(uint8_t startIndex)
 {
 	int value = 0;
-	while ((char c = commandBuf[startIndex++]) != '\n')
+	char c;
+	while ((c = commandBuf[startIndex++]) != '\n')
 	{
         // check for invalid chars
         if (c < '0' || c > '9') return -1;

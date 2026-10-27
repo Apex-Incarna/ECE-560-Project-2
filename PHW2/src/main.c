@@ -160,13 +160,12 @@ int main(void)
 	Control_RGB_LEDs(1, 0, 0); // Red
 	Init_DAC();
 	Control_RGB_LEDs(0, 1, 1); // Cyan
-	Init_LPTMR(1000);
+	// Init_LPTMR(1000);
+	Init_PIT();
 	Control_RGB_LEDs(1, 0, 1); // Magenta
 	printf("\n\rPlease debug me!\n\r");
 	Control_RGB_LEDs(0, 1, 0); // Green
 	Delay(3000);
-
-	Start_LPTMR();
 
 	while (1)
 	{

@@ -5,6 +5,37 @@
 #include "DAC.h"
 #include "ourGlobals.h"
 
+// PIT (Periodic Interrupt Timer) =============================
+
+void Init_PIT() {
+	// enable clock gate
+	SIM->SCGC6 |= SIM_SCGC6_PIT_MASK;
+
+	// enable PIT module in its Module Control Register
+	// and do not freeze timer when in debug modes
+	PIT->MCR = 0;
+}
+
+// Period is passed in microseconds
+void Set_PIT_Period(uint16_t period_usec) {
+	// calculate load value (Mhz and usec cancel out units)
+	uint32_t loadValue = PIT_CLOCK_MHZ * period_usec - 1;
+	PIT->CHANNEL[0].LDVAL = loadValue;
+}
+
+// enable timer to start counting (starts ADC conversions)
+void Start_PIT(void) {
+	PIT->CHANNEL[0].TCTRL = PIT_TCTRL_TEN_MASK;
+}
+
+// stop counting (Stops ADC Conversions)
+void Stop_PIT(void) {
+	PIT->CHANNEL[0].TCTRL = 0;
+}
+
+
+// LPTimer: old code ===========================================
+
 extern float P3V3_voltage;
 extern int do_convert, do_calculate, do_print;
 

@@ -33,7 +33,7 @@ int main(void)
 	Init_ADC();
 	Init_UART2(57600);
 	Control_RGB_LEDs(1, 0, 0); // Red
-	Init_DAC();
+	// Init_DAC(); Not needed for us
 	Control_RGB_LEDs(0, 1, 1); // Cyan
 	// Init_LPTMR(1000);
 	Init_PIT();

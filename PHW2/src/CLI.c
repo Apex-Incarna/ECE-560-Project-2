@@ -1,10 +1,10 @@
 #include <MKL25Z4.H>
 #include "UART.h"
 #include "ourGlobals.h"
+#include "timers.h"
 
-// Parses the integer starting at ringBuf[bufReadIndex] up to the newline character;
+// Parses the integer starting at commandBug[startIndex] up to the newline character;
 // Returns -1 if invalid; otherwise returns the integer
-// Always sets bufReadIndex to be the character after the newline, minding the circular buffer
 int parseIntToNewline(uint8_t startIndex)
 {
 	int value = 0;
@@ -78,21 +78,21 @@ void ProcessCommand(void)
             samplePeriod = parseIntToNewline(1); // start at index 1 and attempt to parse int
             if (samplePeriod >= 5 && samplePeriod <= 1000)
             {
-                // TODO
+				Set_PIT_Period(samplePeriod);
             }
             // ignore command if invalid integer
         }
 		break;
 	case 'N':
-        int numSamples;
+        int numSamplesIn;
 		if (commandBuf[1] == '\n') {
             // no number specified
-            numSamples = 20;
+            numSamplesIn = 20;
         } else {
-            numSamples = parseIntToNewline(1); // start at index 1 and attempt to parse int
-            if (numSamples >= 1 && numSamples <= 2000)
+            numSamplesIn = parseIntToNewline(1); // start at index 1 and attempt to parse int
+            if (numSamplesIn >= 1 && numSamplesIn <= 2000)
             {
-                // TODO
+                numSamples = numSamplesIn;	// set the global that determines sample count
             }
             // ignore command if invalid integer
         }

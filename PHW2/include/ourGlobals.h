@@ -19,4 +19,8 @@ extern float P3V3_voltage;
 extern volatile int do_convert, do_print, do_calculate;
 extern volatile uint32_t ADC_temp;
 
+extern volatile uint16_t dataBuffer[];
+extern volatile uint16_t dataBufIndex;
+extern volatile uint16_t numSamples;
+
 #endif

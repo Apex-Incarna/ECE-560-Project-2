@@ -1,11 +1,17 @@
 #include <MKL25Z4.H>
 #include "ourGlobals.h"
+#include "timers.h"
 
 unsigned int res_min = 0xffff, res_max = 0;
 volatile int conv_complete = 0;
 float P3V3_voltage = 0.0;
 volatile int do_convert = 0, do_print = 0, do_calculate = 0;
 volatile uint32_t ADC_temp = 0;
+
+// Data Buffer
+volatile uint16_t dataBuffer[DATA_BUF_MAX];
+volatile uint16_t dataBufIndex = 0;
+volatile uint16_t numSamples = 1;
 
 void Init_ADC(void)
 {
@@ -99,14 +105,15 @@ void Calibrate_ADC(void)
 
 void ADC0_IRQHandler(void)
 {
-	// TODO: copy data to a buffer until reached num samples?
+	uint16_t ADCResult = ADC0->R[0];	// automatically clears interrupt flag
 
-
-
-	// ADC_temp = ADC0->R[0];
-	// conv_complete = 1;
-	// NVIC_ClearPendingIRQ(ADC0_IRQn);
-	// do_calculate = 1;
+	dataBuffer[dataBufIndex++] = ADCResult;
+	if (dataBufIndex >= numSamples) {
+		Stop_PIT(); // Stop converting
+		dataBufIndex = 0; // Reset buffer index
+		
+		// TODO: set a flag to say finished data acquisition?
+	}
 }
 
 

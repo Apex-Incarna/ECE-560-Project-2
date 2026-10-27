@@ -11,20 +11,38 @@ void Init_ADC(void)
 {
 	SIM->SCGC6 |= SIM_SCGC6_ADC0(1); // Activates the clock for the ADC
 
-	ADC0->CFG1 = ADC_CFG1_ADLPC(0) | ADC_CFG1_ADIV(3) | ADC_CFG1_ADICLK(0) |
-				 ADC_CFG1_ADLSMP(1) | ADC_CFG1_MODE(1);
-	ADC0->CFG2 = ADC_CFG2_ADLSTS(0) | ADC_CFG2_ADHSC(0) | ADC_CFG2_ADACKEN(0) |
-				 ADC_CFG2_MUXSEL(0);
-	ADC0->SC2 = ADC_SC2_REFSEL(0);				   // VREFHL selection, software trigger
-	ADC0->SC3 = ADC_SC3_AVGE(0) | ADC_SC3_AVGS(0); // If enabled (AVGE=1), average multiple samples (0:4, 1:8, 2:16, 3:32)
+
+	ADC0->CFG1 = ADC_CFG1_ADLPC(0) 		// Do not use low power
+				| ADC_CFG1_ADIV(1) 		// Divide clock by 2, results in 12 Mhz ADC Clock
+				| ADC_CFG1_ADICLK(0) 	// Select Bus clock as clock source
+				| ADC_CFG1_ADLSMP(1) 	// Use long sample time to increase acccuracy
+				| ADC_CFG1_MODE(1);		// Use 12-bit conversion
+
+	ADC0->CFG2 = ADC_CFG2_ADLSTS(3)		// Use the shortest Long Sample Time to increase conversion speed
+				| ADC_CFG2_ADHSC(1) 	// Use High-speed configuration since we are running it so fast (required by datasheet)
+				| ADC_CFG2_ADACKEN(0) 	// Do not use asynchronous clock output enable
+				| ADC_CFG2_MUXSEL(0);	// Select the ADC A channels (rather than B)
+
+	ADC0->SC2 = ADC_SC2_ADTRG(1) 		// Use hardware trigger
+				| ADC_SC2_REFSEL(0);	// Default voltage reference
+
+	ADC0->SC3 = ADC_SC3_AVGE(0); // Do not use hardware averaging
+
+	// Configure PIT to trigger the ADC
+	SIM->SOPT7 = SIM_SOPT7_ADC0ALTTRGEN(1)	// allow alternate trigger for ADC
+				| SIM_SOPT7_ADC0TRGSEL(4);  // 4 = PIT Trigger 0
+
+	// Since Hardware trigger is set, this does not start a conversion
+    ADC0->SC1[0] = ADC_SC1_ADCH(12) 	// set default input channel to 12
+                   | ADC_SC1_AIEN(1);	// enable conversion complete interrupt
 
 	// Configure NVIC
-	NVIC_SetPriority(ADC0_IRQn, 3); // 0, 1, 2 or 3
+	NVIC_SetPriority(ADC0_IRQn, 1); // Priorities 0-3, 0 is highest
 	NVIC_ClearPendingIRQ(ADC0_IRQn);
 	NVIC_EnableIRQ(ADC0_IRQn);
 
-	// Enable bandgap buffer
-	PMC->REGSC |= PMC_REGSC_BGBE_MASK;
+	// Enable bandgap buffer (We do not need this)
+	// PMC->REGSC |= PMC_REGSC_BGBE_MASK;
 }
 
 void Calibrate_ADC(void)
@@ -72,18 +90,23 @@ void Calibrate_ADC(void)
 	ADC0_MG = mcal;
 }
 
-void Convert(void)
-{
-	conv_complete = 0;
-	ADC0->SC1[0] = ADC_SC1_AIEN(1) | ADC_SC1_ADCH(27); // start conversion on channel 27 (Bandgap reference)
-}
+// Not needed due to PIT triggering
+// void Convert(void)
+// {
+// 	conv_complete = 0;
+// 	ADC0->SC1[0] = ADC_SC1_AIEN(1) | ADC_SC1_ADCH(27); // start conversion on channel 27 (Bandgap reference)
+// }
 
 void ADC0_IRQHandler(void)
 {
-	ADC_temp = ADC0->R[0];
-	conv_complete = 1;
-	NVIC_ClearPendingIRQ(ADC0_IRQn);
-	do_calculate = 1;
+	// TODO: copy data to a buffer until reached num samples?
+
+
+
+	// ADC_temp = ADC0->R[0];
+	// conv_complete = 1;
+	// NVIC_ClearPendingIRQ(ADC0_IRQn);
+	// do_calculate = 1;
 }
 
 

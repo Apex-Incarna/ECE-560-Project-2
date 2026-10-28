@@ -1,16 +1,10 @@
 /*----------------------------------------------------------------------------
  *----------------------------------------------------------------------------*/
-#include <MKL25Z4.H>
-#include <stdio.h>
-#include "gpio_defs.h"
-#include "LEDs.h"
-#include "UART.h"
-#include "DAC.h"
-#include "timers.h"
-#include "delay.h"
 #include "ourGlobals.h"
 
 #define SAMPLES_TO_AVERAGE (25)
+
+volatile uint8_t state = CLI_STATE;
 
 void Misc(void)
 {
@@ -42,24 +36,30 @@ int main(void)
 	Control_RGB_LEDs(0, 1, 0); // Green
 	Delay(3000);
 
+	printf("\n> "); // Initial >
+
 	while (1)
 	{
-		ProcessRingBuf();
+		switch (state)
+		{
+		case CLI_STATE:
+			ProcessRingBuf();
+			break;
 
-		if (do_convert > 0)
-		{
-			do_convert--;
-			Convert();
-		}
-		if (do_calculate > 0)
-		{
-			do_calculate--;
-			P3V3_voltage = Calculate();
-		}
-		if (do_print > 0)
-		{
-			Print(P3V3_voltage);
-			do_print = 0;
+		case AWAIT_STATE:
+			/* code */
+			break;
+
+		case RECORD_STATE:
+			/* code */
+			break;
+
+		case SEND_STATE:
+			/* code */
+			break;
+
+		default:
+			break;
 		}
 	}
 }

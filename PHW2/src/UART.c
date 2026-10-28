@@ -1,5 +1,3 @@
-#include "UART.h"
-#include <stdio.h>
 #include "ourGlobals.h"
 
 #if 0
@@ -14,7 +12,7 @@ FILE __stdin;  // use with fget/sscanf, or scanf
 
 volatile char ringBuf[RING_SIZE];
 volatile uint8_t ringHead = 0; // write to the head (owned by ISR)
-volatile uint8_t ringTail = 0;	// read from the tail (owned by main loop)
+volatile uint8_t ringTail = 0; // read from the tail (owned by main loop)
 
 // Retarget the fputc method to use the UART2
 int fputc(int ch, FILE *f)
@@ -83,7 +81,7 @@ void Init_UART2(uint32_t baud_rate)
 	NVIC_EnableIRQ(UART2_IRQn);
 
 	// Enable UART receive interrupt
-	UART2->C2 |= UART2_C2_RIE(1);
+	UART2->C2 |= UART_C2_RIE(1);
 
 	// Enable UART receiver and transmitter
 	UART2->C2 |= UART_C2_RE(1) | UART_C2_TE(1);
@@ -95,11 +93,13 @@ void Init_UART2(uint32_t baud_rate)
 
 void UART2_IRQHandler(void)
 {
-	if (UART2->S1 & UART_S1_RDRF_MASK) {	// Received Char Interrupt
+	if (UART2->S1 & UART_S1_RDRF_MASK)
+	{						 // Received Char Interrupt
 		char cin = UART2->D; // reading this clears the interrupt flag
 
 		uint8_t nextHead = nextIndex(ringHead);
-		if (nextHead == ringTail) {
+		if (nextHead == ringTail)
+		{
 			// Ring Full! Do not proceed to write the next character
 			// TODO: Turn on RED Led
 			return;
@@ -107,6 +107,7 @@ void UART2_IRQHandler(void)
 
 		ringBuf[ringHead] = cin; // Reads the receieved character into ringBuf
 		ringHead = nextIndex(ringHead);
+		
 	}
 }
 

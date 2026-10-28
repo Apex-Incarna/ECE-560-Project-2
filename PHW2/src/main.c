@@ -21,18 +21,13 @@ void Misc(void)
 int main(void)
 {
 	Init_RGB_LEDs();
-	Control_RGB_LEDs(1, 1, 0); // Yellow
 	Misc();
 	Calibrate_ADC();
 	Init_ADC();
-	Init_UART2(57600);
 	Control_RGB_LEDs(1, 0, 0); // Red
-	// Init_DAC(); Not needed for us
-	Control_RGB_LEDs(0, 1, 1); // Cyan
-	// Init_LPTMR(1000);
+	Init_UART2(57600);
+	Control_RGB_LEDs(1, 1, 0); // Yellow
 	Init_PIT();
-	Control_RGB_LEDs(1, 0, 1); // Magenta
-	printf("\n\rPlease debug me!\n\r");
 	Control_RGB_LEDs(0, 1, 0); // Green
 	Delay(3000);
 
@@ -43,19 +38,25 @@ int main(void)
 		switch (state)
 		{
 		case CLI_STATE:
+			SET_LED_BLUE;
 			ProcessRingBuf();
 			break;
 
 		case AWAIT_STATE:
-			/* code */
+			SET_LED_YEL;
+			// Do nothin'
+
 			break;
 
 		case RECORD_STATE:
-			/* code */
+			SET_LED_GREEN;
+			// Do nothin'
 			break;
 
 		case SEND_STATE:
-			/* code */
+			SET_LED_MAG;
+
+			Send_Data(); // Runs to completion
 			break;
 
 		default:

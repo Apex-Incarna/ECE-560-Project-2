@@ -122,22 +122,52 @@ void ProcessCommand(void)
 		// ignore command if invalid integer
 		break;
 	case 'A':
-		// Set ADC to waiting for trigger mode
+		// Only process the command if it has no arguments (any passed parameters would be invalid)
+		if (commandBuf[1] == '\0')
+		{
+			printf("Awaiting trigger.");
+
+			state = AWAIT_STATE;
+
+			Set_ADC_Waiting_Trigger();
+		}
 		break;
 	case 'F':
-		// Set ADC to period sample mode and start timer
+		// Only process the command if it has no arguments (any passed parameters would be invalid)
+		if (commandBuf[1] == '\0')
+		{
+			printf("Recording started.");
+
+			state = RECORD_STATE;
+
+			Set_ADC_Periodic_Sampling();
+		}
 		break;
 	case 'S':
-		/* code */
+		// Only process the command if it has no arguments (any passed parameters would be invalid)
+		if (commandBuf[1] == '\0')
+		{
+			state = SEND_STATE;
+		}
 		break;
 	default:
+		// Give no indication of an invalid command; just start a newline with the >
 		break;
 	}
 
 	printf("\n> ");
+}
 
-	// If A received, await trigger
-	// If trigger met, start conversion
+void Send_Data(void)
+{
+	printf("Sending data (%d samples).\n", numSamples);
 
-	// If S receieved, send data
+	uint16_t i;
+
+	for (i = 0; i < numSamples; i++)
+	{
+		printf("%d: %.3f V\n", i, ((float)dataBuffer[i] / 65536) * 3.3f);
+	}
+
+	state = CLI_STATE;
 }

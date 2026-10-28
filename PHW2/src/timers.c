@@ -10,6 +10,9 @@ void Init_PIT()
 	// enable PIT module in its Module Control Register
 	// and do not freeze timer when in debug modes
 	PIT->MCR = 0;
+
+	uint32_t loadValue = PIT_CLOCK_MHZ * DEFAULT_PERIOD - 1;
+	PIT->CHANNEL[0].LDVAL = loadValue;
 }
 
 // Period is passed in microseconds

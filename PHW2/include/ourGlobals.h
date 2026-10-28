@@ -15,8 +15,8 @@
 extern volatile char ringBuf[];
 extern volatile uint8_t ringHead; // write to the head
 extern volatile uint8_t ringTail; // read from the tail
-
 extern char commandBuf[COMMAND_SIZE];
+void Send_Data(void);
 
 // ADC Globals
 extern volatile int conv_complete;
@@ -36,5 +36,18 @@ extern volatile uint8_t state;
 #define AWAIT_STATE (0x01)
 #define RECORD_STATE (0x02)
 #define SEND_STATE (0x03)
+
+// LED Globals
+#define SET_LED_OFF Control_RGB_LEDs(0, 0, 0)
+#define SET_LED_RED Control_RGB_LEDs(1, 0, 0)
+#define SET_LED_GREEN Control_RGB_LEDs(0, 1, 0)
+#define SET_LED_BLUE Control_RGB_LEDs(0, 0, 1)
+#define SET_LED_YEL Control_RGB_LEDs(1, 1, 0)
+#define SET_LED_MAG Control_RGB_LEDs(1, 0, 1)
+#define SET_LED_CYAN Control_RGB_LEDs(0, 1, 1)
+#define SET_LED_WHITE Control_RGB_LEDs(1, 1, 1)
+
+// Timer Globals
+#define DEFAULT_PERIOD 100
 
 #endif

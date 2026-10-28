@@ -11,7 +11,6 @@ volatile uint16_t dataBuffer[DATA_BUF_MAX];
 volatile uint16_t dataBufIndex = 0;
 volatile uint16_t numSamples = 1;
 volatile uint8_t ADC_Channel = 12;
-volatile uint8_t triggered = 0;
 
 void Init_ADC(void)
 {
@@ -48,7 +47,7 @@ void Init_ADC(void)
 	NVIC_EnableIRQ(ADC0_IRQn);
 
 	// Enable bandgap buffer (We do not need this)
-	// PMC->REGSC |= PMC_REGSC_BGBE_MASK;
+	PMC->REGSC |= PMC_REGSC_BGBE_MASK;
 }
 
 void Set_ADC_Waiting_Trigger(void)
@@ -61,14 +60,14 @@ void Set_ADC_Waiting_Trigger(void)
 
 	ADC0->SC3 = ADC_SC3_ADCO_MASK; // Continuous Conversion Enable
 
-	triggered = 0; // reset trigger flag
-
 	ADC0->SC1[0] = ADC_SC1_AIEN_MASK			// Enable conversion-complete interrupt and start conversions
 				   | ADC_SC1_ADCH(ADC_Channel); // Set channel back to current channel
 }
 
 void Set_ADC_Periodic_Sampling(void)
 {
+	Start_PIT();
+
 	ADC0->SC1[0] = ADC_SC1_ADCH(31); // Disables the channel to abort any ongoing conversion
 
 	ADC0->SC3 = 0; // Disable Continuous Conversion
@@ -83,13 +82,13 @@ void ADC0_IRQHandler(void)
 {
 	uint16_t ADCResult = ADC0->R[0]; // automatically clears interrupt flag
 
-	if (!triggered)
+	if (state == AWAIT_STATE)
 	{
 		// This is the first data point after the trigger
 
-		Start_PIT();
 		Set_ADC_Periodic_Sampling();
-		triggered = 1;
+
+		state = RECORD_STATE;
 	}
 
 	dataBuffer[dataBufIndex++] = ADCResult;
@@ -97,8 +96,7 @@ void ADC0_IRQHandler(void)
 	{
 		Stop_PIT();		  // Stop converting
 		dataBufIndex = 0; // Reset buffer index
-
-		// TODO: set a flag to say finished data acquisition?
+		state = CLI_STATE;
 	}
 }
 

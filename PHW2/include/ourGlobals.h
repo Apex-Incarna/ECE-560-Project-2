@@ -22,5 +22,6 @@ extern volatile uint32_t ADC_temp;
 extern volatile uint16_t dataBuffer[];
 extern volatile uint16_t dataBufIndex;
 extern volatile uint16_t numSamples;
+extern volatile uint8_t ADC_Channel;
 
 #endif

@@ -66,7 +66,7 @@ void ProcessCommand(void)
             channelNum = parseIntToNewline(1); // start at index 1 and attempt to parse int
             if (channelNum == 12 || channelNum == 26 || channelNum == 27)
             {
-                ADC0->SC1[0] = ADC_SC1_ADCH(channelNum);
+                ADC_Channel = channelNum;
 
                 printf("Channel %d selected.", channelNum);
             }
@@ -102,10 +102,10 @@ void ProcessCommand(void)
         }
 		break;
 	case 'A':
-		/* code */
+		// Set ADC to waiting for trigger mode
 		break;
 	case 'F':
-		/* code */
+		// Set ADC to period sample mode and start timer
 		break;
 	case 'S':
 		/* code */
